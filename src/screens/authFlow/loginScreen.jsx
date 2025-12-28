@@ -10,6 +10,7 @@ const loginScreen = () => {
   const navigation = useNavigation();
   const [phone, setphone] = useState("");
   const [loading, setloading] = useState(false);
+  
 
   const handlelogin = async () => {
     if (!phone) {

@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["jest"],
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/screens/authFlow/onboardingScreen.jsx", "src/screens/authFlow/loginScreen.jsx", "src/screens/authFlow/otpVerificationScreen.jsx"],
+  "include": ["**/*.ts", "**/*.tsx", "src/screens/authFlow/onboardingScreen.jsx", "src/screens/authFlow/loginScreen.jsx", "src/screens/authFlow/otpVerificationScreen.jsx", "src/screens/homeScreenFlow/homeScreen.jsx", "src/screens/homeScreenFlow/uploadFilesScreen.jsx"],
   "exclude": ["**/node_modules", "**/Pods"]
 }

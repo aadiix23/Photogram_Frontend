@@ -1,69 +1,94 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native'
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import axios from 'axios';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
-const loginScreen = () => {
-  const [phone, setphone] = useState("");
-  const [otp, setotp] = useState(["", "", "", "", ""]);
+const OtpVerificationScreen = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  const phone = route.params?.phone; // ✅ safe access
+
+  const [otp, setOtp] = useState(["", "", "", "", ""]);
   const inputs = useRef([]);
+
   const handleChange = (text, index) => {
     if (text.length > 1) return;
+
     const newOtp = [...otp];
     newOtp[index] = text;
-    setotp(newOtp);
+    setOtp(newOtp);
 
     if (text && index < 4) {
-      inputs.current[index + 1].focus();
+      inputs.current[index + 1]?.focus();
     }
   };
+
   const handleBackspace = (key, index) => {
     if (key === "Backspace" && otp[index] === "" && index > 0) {
-      inputs.current[index - 1].focus();
+      inputs.current[index - 1]?.focus();
     }
   };
-  const handleVerify = () => {
+
+  const handleVerify = async () => {
     const finalOtp = otp.join("");
 
     if (finalOtp.length !== 5) {
-      Alert.alert("Please Enter The OTP");
+      Alert.alert("Error", "Please enter complete OTP");
       return;
     }
-    console.log("OTP:", finalOtp);
-  }
+
+    try {
+      const response = await axios.post(
+        "https://nondomestically-supersubtle-taisha.ngrok-free.dev/auth/verify-otp",
+        {
+          phone,
+          otp: finalOtp,
+        }
+      );
+
+      console.log("OTP Verified:", response.data);
+      navigation.navigate("homeScreen")
+
+    } catch (error) {
+      console.log(error?.response?.data || error.message);
+      Alert.alert("Error", "Invalid OTP or Server Error");
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#FDFDFD', '#E6F4FC']}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
       style={styles.container}
     >
       <SafeAreaView>
-        <View style={{ flexDirection: "row", alignContent: "center", justifyContent: "center", top: 40 }}>
-          <Image
-            source={require('../../assets/images/icon.png')}
-          />
-          <Text style={{ top: 5, fontSize: 25, fontWeight: "500", color: "#616161", fontFamily: "PassionOne-Bold" }}>{"  "}PHOTOGRAM</Text>
+        {/* Header */}
+        <View style={{ flexDirection: "row", justifyContent: "center", top: 40 }}>
+          <Image source={require('../../assets/images/icon.png')} />
+          <Text style={{ top: 5, fontSize: 25, fontWeight: "500", color: "#616161", fontFamily: "PassionOne-Bold" }}>
+            {"  "}PHOTOGRAM
+          </Text>
         </View>
+
+        {/* Title */}
         <View style={{ top: 80, marginLeft: 15 }}>
-          <Text style={{ color: "#616161", fontSize: 30, fontWeight: "500", fontFamily: "Quicksand-Bold" }}>Input OTP</Text>
-          <Text style={{ color: "#787878", fontSize: 20, fontWeight: "400", fontFamily: "Quicksand-Bold" }}>Input The Code That Has Been Sent To Telegram</Text>
+          <Text style={{ fontSize: 30, fontFamily: "Quicksand-Bold", color: "#616161" }}>
+            Input OTP
+          </Text>
+          <Text style={{ fontSize: 20, color: "#787878", fontFamily: "Quicksand-Bold" }}>
+            OTP sent to {phone}
+          </Text>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignContent: "center", top: "110", marginHorizontal: 50 }}>
+
+        {/* OTP BOXES */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginHorizontal: 50, marginTop: 110 }}>
           {otp.map((digit, index) => (
             <TextInput
               key={index}
               ref={(ref) => (inputs.current[index] = ref)}
-              style={{
-                borderWidth: 1,
-                width: "14%",
-                borderRadius: 5,
-                borderColor: "#BEBEBE",
-                color: "#787878",
-                fontSize: 18,
-                fontFamily: "Quicksand-Bold",
-                textAlign: "center"
-              }}
+              style={styles.otpBox}
               keyboardType="number-pad"
               maxLength={1}
               value={digit}
@@ -74,30 +99,62 @@ const loginScreen = () => {
             />
           ))}
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", top: 150 }}>
-          <Text style={{ color: "#787878", fontFamily: "Quicksand-Bold" }}>Didn’t receive OTP ? </Text>
-          <Text style={{ color: "#3092BC", fontFamily: "Quicksand-Bold" }}>Resend OTP</Text>
+
+        {/* Resend */}
+        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 40 }}>
+          <Text style={{ color: "#787878", fontFamily: "Quicksand-Bold" }}>
+            Didn’t receive OTP?{" "}
+          </Text>
+          <Text style={{ color: "#3092BC", fontFamily: "Quicksand-Bold" }}>
+            Resend OTP
+          </Text>
         </View>
-        <View style={{ justifyContent: "center", alignItems: "center", top: "160", backgroundColor: "#6996DE", padding: 13, marginHorizontal: 100, borderRadius: 10 }}>
-          <TouchableOpacity>
-            <Text style={{ color: "#ffffff", fontSize: 22, fontWeight: 500, fontFamily: "PassionOne-Regular" }}>
-              Sign in With Telegram
-            </Text>
+
+        {/* Verify Button */}
+        <View style={{ alignItems: "center", marginTop: 40 }}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={handleVerify}
+          >
+            <Text style={styles.btnText}>Verify OTP</Text>
           </TouchableOpacity>
         </View>
+
         <Image
           source={require('../../assets/images/Optimizex.webp')}
-          style={{ width: 410, height: 420, top: 280 }}
+          style={{ width: 410, height: 420, marginTop: 60 }}
         />
       </SafeAreaView>
     </LinearGradient>
-  )
-}
+  );
+};
 
-export default loginScreen
+export default OtpVerificationScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  }
-})
+  },
+  otpBox: {
+    borderWidth: 1,
+    width: "14%",
+    borderRadius: 5,
+    borderColor: "#BEBEBE",
+    color: "#787878",
+    fontSize: 18,
+    textAlign: "center",
+    fontFamily: "Quicksand-Bold",
+  },
+  btn: {
+    backgroundColor: "#6996DE",
+    padding: 14,
+    borderRadius: 10,
+    width: 220,
+    alignItems: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 20,
+    fontFamily: "PassionOne-Regular",
+  },
+});

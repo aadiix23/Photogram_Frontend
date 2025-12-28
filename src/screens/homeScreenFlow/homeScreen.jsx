@@ -1,8 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions,TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import MasonryList from '@react-native-seoul/masonry-list';
+import Icon from 'react-native-vector-icons/Feather';
 
 const width = Dimensions.get('window').width;
 
@@ -538,7 +539,6 @@ const images = [
   { id: '4', uri: 'https://picsum.photos/300/350' },
 
 ];
-
 const HomeScreen = () => {
   return (
     <LinearGradient
@@ -548,19 +548,21 @@ const HomeScreen = () => {
       style={styles.container}
     >
       <SafeAreaView style={{ flex: 1 }}>
-
-
-        <Text style={styles.title}>Gallery</Text>
-
-        <Text style={styles.subTitle}>Photos</Text>
-
-
-        <MasonryList
+<View style={{justifyContent:"space-between",flexDirection:"row",top: 30,marginHorizontal:15}}>
+  <TouchableOpacity onPress={() => console.log('Menu pressed')}>
+    <Icon name="menu" size={28} color="#7AABCF" />
+  </TouchableOpacity>
+  <Text style={{ fontSize: 25, color: "#7AABCF", fontWeight: 500, fontFamily:"PassionOne-Bold" }}>
+    ALBUM
+  </Text>
+  <Icon name="upload-cloud" size={28} color="#7AABCF" />
+</View>
+<MasonryList
           data={images}
           numColumns={3}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 10,paddingTop:50 }}
           renderItem={({ item }) => (
             <Image
               source={{ uri: item.uri }}
@@ -571,6 +573,7 @@ const HomeScreen = () => {
                 marginBottom: 10,
               }}
             />
+          
           )}
         />
       </SafeAreaView>
