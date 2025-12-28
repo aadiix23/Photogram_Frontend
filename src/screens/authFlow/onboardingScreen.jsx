@@ -31,12 +31,12 @@ const onboardingScreen = () => {
                     alignItems: "center",
                     top: 500,
                     backgroundColor: "#6996DE",
-                    padding: 20,
+                    padding: 14,
                     marginHorizontal: 60,
                     borderRadius: 15, elevation: 4
                 }}>
                     <TouchableOpacity onPress={() => navigation.navigate('loginScreen')}>
-                        <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "500",fontFamily:"Quicksand-Bold" }}>Get Started</Text>
+                        <Text style={{ color: "#ffffff", fontSize: 30, fontWeight: "500",fontFamily:"PassionOne-Regular" }}>Get Started</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>

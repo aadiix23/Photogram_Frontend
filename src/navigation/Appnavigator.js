@@ -11,7 +11,7 @@ const Stack = createNativeStackNavigator();
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="onboardingScreen"
+      <Stack.Navigator initialRouteName="otpVerificationScreen"
       screenOptions={{
         headerShown:false,
       }}>

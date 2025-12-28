@@ -23,7 +23,7 @@ const loginScreen = () => {
       });
       console.log("Response", response.data);
       navigation.navigate('otpVerificationScreen', {
-        phone: `+91${phone}`,
+        phone:`+91${phone}`,
       });
 
 
@@ -67,7 +67,7 @@ const loginScreen = () => {
         </View>
         <View style={{ justifyContent: "center", alignItems: "center", top: "190", backgroundColor: "#6996DE", padding: 13, marginHorizontal: 100, borderRadius: 10 }}>
           <TouchableOpacity onPress={handlelogin}>
-            <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: 500 }}>
+            <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: 500,fontFamily:"PassionOne-Regular" }}>
               Sign In With Telegram
             </Text>
           </TouchableOpacity>
