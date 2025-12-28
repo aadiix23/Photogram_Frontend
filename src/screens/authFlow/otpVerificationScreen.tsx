@@ -25,27 +25,28 @@ const loginScreen = () => {
       </View>
       <View style={{flexDirection:"row",justifyContent:"space-between",alignContent:"center",top:"110",marginHorizontal:60,}}>
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"}}
         />
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"}}
         />
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"}}
         />
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"}}
         />
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"}}
         />
         <TextInput
-        style={{borderWidth:1,width:"15%",borderRadius:5}}
+        style={{borderWidth:1,width:"15%",borderRadius:5,borderColor:"#BEBEBE"
+        }}
         />
       </View>
       <View style={{flexDirection:"row",alignItems:"center",justifyContent:"center",top:150}}>
       <Text style={{color:"#787878"}}>Didn’t receive OTP ? </Text>
-      <Text>Resend OTP</Text>
+      <Text style={{color:"#3092BC"}}>Resend OTP</Text>
       </View>
       <View style={{justifyContent:"center",alignItems:"center",top:"160",backgroundColor:"#6996DE",padding:13,marginHorizontal:100,borderRadius:10}}>
       <TouchableOpacity>

@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["jest"],
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "src/screens/authFlow/onboardingScreen.jsx", "src/screens/authFlow/loginScreen.jsx", "src/screens/authFlow/otpVerificationScreen.tsx"],
   "exclude": ["**/node_modules", "**/Pods"]
 }

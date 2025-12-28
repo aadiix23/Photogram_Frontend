@@ -1,0 +1,45 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Quicksand-Bold.ttf",
+      "sha1": "111e880f4de54ccf0a7fd14f38999b9c066e46bb"
+    },
+    {
+      "path": "src/assets/fonts/PassionOne-Regular.ttf",
+      "sha1": "5acf813f59c57f10555e64824fccbf588001b478"
+    },
+    {
+      "path": "src/assets/fonts/PassionOne-Bold.ttf",
+      "sha1": "8529424dcfb3c01d284434f45dc6331e0ef283f1"
+    },
+    {
+      "path": "src/assets/fonts/Quicksand-Medium.ttf",
+      "sha1": "04b8198132a4a092b10d0631500268d6a2a0f889"
+    },
+    {
+      "path": "src/assets/fonts/PassionOne-Black.ttf",
+      "sha1": "8b2675552ba5e4af55205116e80909e929a0f12d"
+    },
+    {
+      "path": "src/assets/fonts/Quicksand-Regular.ttf",
+      "sha1": "61504eaec812663121918199aac7d960229bd306"
+    },
+    {
+      "path": "src/assets/fonts/Quicksand.ttf",
+      "sha1": "4ee75a4e8cdc8d7cb73c9d37859d5e96da254ecb"
+    },
+    {
+      "path": "src/assets/fonts/Quicksand-SemiBold.ttf",
+      "sha1": "339f8d3e09ad271ff12727eef33a99f7a066eee3"
+    },
+    {
+      "path": "src/assets/fonts/OFL.txt",
+      "sha1": "3d3c978ba9bfea1da0812872345f19473a7186ff"
+    },
+    {
+      "path": "src/assets/fonts/Quicksand-Light.ttf",
+      "sha1": "4d3b72ff1544d92ca9a435d7e34d21eda322dd76"
+    }
+  ]
+}
