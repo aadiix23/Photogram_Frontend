@@ -42,11 +42,12 @@ const onboardingScreen = () => {
                         <Text style={[styles.description, { fontSize: descriptionFontSize }]}>Because every picture deserves a safe place to stay forever.</Text>
                     </View>
 
-                    <View style={[styles.buttonWrap, { paddingVertical: buttonPaddingVertical }]}>
-                        <TouchableOpacity onPress={() => navigation.navigate('loginScreen')}>
-                            <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>Get Started</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                        style={[styles.button, { paddingVertical: buttonPaddingVertical }]}
+                        onPress={() => navigation.navigate('loginScreen')}
+                    >
+                        <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>Get Started</Text>
+                    </TouchableOpacity>
                 </View>
             </SafeAreaView>
         </LinearGradient>
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Quicksand-Bold',
         paddingHorizontal: width * 0.05,
     },
-    buttonWrap: {
+    button: {
         width: '82%',
         alignItems: 'center',
         backgroundColor: '#6996DE',
