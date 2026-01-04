@@ -4,38 +4,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { useSendOtpMutation } from '../../services/authApi';
 
 const { width, height } = Dimensions.get('window');
 
 const loginScreen = () => {
   const navigation = useNavigation();
   const [phone, setphone] = useState("");
-  const [loading, setloading] = useState(false);
+  const [sendOtp, { isLoading, error, data }] = useSendOtpMutation();
 
 
   const handlelogin = async () => {
-    if (!phone) {
-      Alert.alert("Error", "Please Enter Your Telegram Number");
-      return;
-    }
     try {
-      setloading(true);
-      const response = await axios.post('https://nondomestically-supersubtle-taisha.ngrok-free.dev/auth/send-otp', {
-        phone: `+91${phone}`
-      });
-      console.log("Response", response.data);
+      const response = await sendOtp({
+        phone: `+91${phone}`,
+      }).unwrap();
+
+
       navigation.navigate('otpVerificationScreen', {
         phone: `+91${phone}`,
       });
+    } catch (err) {
 
-
-    } catch (error) {
-      Alert.alert("Error", "Something went wrong");
-
-    } finally {
-      setloading(false);
     }
-  }
+  };
+
+
   return (
     <LinearGradient
       colors={['#FDFDFD', '#E6F4FC']}
@@ -56,7 +50,7 @@ const loginScreen = () => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoidingView}
         >
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
             <View style={styles.headerContainer}>
               <Image
@@ -67,7 +61,9 @@ const loginScreen = () => {
             </View>
 
             <View style={styles.welcomeContainer}>
-              <Text style={styles.welcomeText}>Welcome To Photogram</Text>
+              <Text style={styles.welcomeText}>
+                Welcome To <Text style={styles.photogramText}>Photogram</Text>
+              </Text>
               <Text style={styles.subText}>Because every picture deserves a safe place to stay forever.</Text>
             </View>
 
@@ -106,7 +102,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    zIndex: 1, // Ensure content is above the image
+    zIndex: 1,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -114,22 +110,24 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 100, // Space for the footer image
+    paddingTop: height * 0.05,
+    paddingBottom: height * 0.1,
   },
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40,
+    marginBottom: height * 0.05,
   },
   logoIcon: {
-    width: 40,
-    height: 40,
+    width: width * 0.1,
+    height: width * 0.1,
     resizeMode: 'contain',
+    maxWidth: 40,
+    maxHeight: 40,
   },
   headerText: {
-    fontSize: 25,
+    fontSize: Math.max(20, Math.min(24, width * 0.06)),
     fontWeight: "500",
     color: "#616161",
     fontFamily: "PassionOne-Bold",
@@ -137,20 +135,25 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     alignItems: "center",
-    marginBottom: 60,
+    marginBottom: height * 0.06,
     paddingHorizontal: 40,
   },
   welcomeText: {
     color: "#3092BC",
-    fontSize: 30,
+    fontSize: Math.max(24, Math.min(28, width * 0.07)),
     fontWeight: "500",
     fontFamily: "Quicksand-Bold",
     marginBottom: 10,
     textAlign: 'center',
   },
+  photogramText: {
+    fontSize: Math.max(28, Math.min(34, width * 0.085)),
+    color: "#3092BC",
+    fontFamily: "Quicksand-Bold",
+  },
   subText: {
     color: "#787878",
-    fontSize: 20,
+    fontSize: Math.max(14, Math.min(18, width * 0.045)),
     fontWeight: "500",
     textAlign: "center",
     fontFamily: "Quicksand-Bold",
@@ -158,9 +161,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: height * 0.05,
     marginHorizontal: 40,
-    width: '80%',
+    width: '85%',
     justifyContent: 'center',
   },
   countryCode: {
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#6996DE",
     paddingVertical: 13,
-    width: '80%', // Fixed width for better pressability
+    width: '85%',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
   },
   footerImageContainer: {
     position: 'absolute',
-    bottom: -50,
+    bottom: 0,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -212,6 +215,6 @@ const styles = StyleSheet.create({
   },
   footerImage: {
     width: width,
-    height: 450, // Increased height
+    height: height * 0.45,
   },
 })

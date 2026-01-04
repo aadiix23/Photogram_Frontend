@@ -1,124 +1,101 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import MasonryList from '@react-native-seoul/masonry-list';
 import Icon from 'react-native-vector-icons/Feather';
-
-import axios from 'axios';
+import Header from '../../components/Header';
+import { useGetFilesQuery, useUploadFileMutation } from '../../services/authApi';
+import { pick, types, isCancel } from '@react-native-documents/picker';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const width = Dimensions.get('window').width;
+import CustomAlert from '../../components/CustomAlert';
 
 const HomeScreen = () => {
+  const { width } = Dimensions.get('window');
+  const navigation = useNavigation();
   const [token, setToken] = useState(null);
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isTokenChecking, setIsTokenChecking] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: files = [], isLoading, isError, error, refetch } = useGetFilesQuery();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
 
-  const baseUrl = 'https://photogram-backend-xp7b.onrender.com';
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
-  const extractFilesArray = (data, depth = 0) => {
-    if (depth > 5 || data == null) return [];
-    if (Array.isArray(data)) return data;
-    if (typeof data !== 'object') return [];
-
-    if (Array.isArray(data.files)) return data.files;
-
-    for (const key of Object.keys(data)) {
-      const found = extractFilesArray(data[key], depth + 1);
-      if (Array.isArray(found) && found.length >= 0) {
-        if (Array.isArray(data[key]?.files)) return data[key].files;
-      }
-      if (Array.isArray(found) && found.length > 0) return found;
-    }
-
-    return [];
+  const showAlert = (title, message) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertVisible(true);
   };
 
-  const fetchFiles = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log('FILES API token:', token);
-      if (!token) {
-        throw new Error('Missing token. Please verify OTP again so the token is saved, then reopen HomeScreen.');
-      }
-
-      const response = await axios.get(`${baseUrl}/files`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      console.log('FILES API response:', response?.data);
-
-      const rawData = response?.data;
-      const parsedData = typeof rawData === 'string' ? (() => {
-        try {
-          return JSON.parse(rawData);
-        } catch {
-          return null;
-        }
-      })() : rawData;
-
-      console.log('FILES API keys:', parsedData && typeof parsedData === 'object' ? Object.keys(parsedData) : parsedData);
-
-      const apiFiles = Array.isArray(parsedData?.files) ? parsedData.files : [];
-
-      console.log('FILES apiFiles count:', apiFiles.length);
-      console.log('FILES first item:', apiFiles[0]);
-
-      const mapped = apiFiles
-        .filter((f) => {
-          const mime = (f?.mimeType || '').toLowerCase();
-          const isImage = !mime || mime.startsWith('image/');
-          return Boolean(f?.viewUrl) && isImage;
-        })
-        .map((f) => ({
-          id: f.id,
-          uri: `${baseUrl}${f.viewUrl}`,
-          fileName: f.fileName,
-          uploadedAt: f.uploadedAt,
-        }));
-
-      console.log('FILES mapped count:', mapped.length);
-
-      setFiles(mapped);
-    } catch (e) {
-      console.log('FILES API ERROR:', e?.response?.status, e?.response?.data || e?.message);
-      const status = e?.response?.status;
-      if (status === 401) {
-        setError('401 Unauthorized: backend requires authentication for /files.');
-      } else {
-        setError(e?.response?.data?.message || e?.message || 'Failed to load files');
-      }
-      setFiles([]);
-    } finally {
-      setLoading(false);
-    }
+  const hideAlert = () => {
+    setAlertVisible(false);
   };
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('authToken');
-        setToken(storedToken);
-      } catch (e) {
-        setError('Failed to read auth token');
-      }
+    const fetchToken = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+      setIsTokenChecking(false);
     };
-    init();
+    fetchToken();
   }, []);
 
-  useEffect(() => {
-    if (token) {
-      fetchFiles();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } catch (error) {
+
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [token]);
+  };
+
+  const handleUpload = async () => {
+    try {
+      const results = await pick({
+        type: [types.images],
+        allowMultiSelection: true,
+        copyTo: 'cachesDirectory',
+      });
+
+      if (!results || results.length === 0) return;
+
+      const uploadPromises = results.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', {
+          uri: file.uri,
+          type: file.type,
+          name: file.name,
+        });
+        return uploadFile(formData).unwrap();
+      });
+
+      await Promise.all(uploadPromises);
+
+      showAlert('Success', `${results.length} file(s) uploaded successfully!`);
+      refetch();
+    } catch (err) {
+      if (typeof isCancel === 'function' && isCancel(err)) {
+
+      } else {
+        showAlert('Upload Error', err?.data?.message || err?.message || JSON.stringify(err));
+      }
+    }
+  };
 
   const heights = useMemo(() => {
     const baseHeights = [180, 220, 260, 200, 240, 210];
     return files.map((_, idx) => baseHeights[idx % baseHeights.length]);
   }, [files]);
+
+  const errorMessage = isError
+    ? (error?.data?.message || error?.message || 'Failed to load files')
+    : null;
 
   return (
     <LinearGradient
@@ -128,26 +105,37 @@ const HomeScreen = () => {
       style={styles.container}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ justifyContent: "space-between", flexDirection: "row", top: 30, marginHorizontal: 15 }}>
-          <TouchableOpacity onPress={() => console.log('Menu pressed')}>
-            <Icon name="menu" size={28} color="#7AABCF" />
-          </TouchableOpacity>
-          <Text style={{ fontSize: 25, color: "#7AABCF", fontWeight: 500, fontFamily: "PassionOne-Bold" }}>
-            ALBUM
-          </Text>
-          <TouchableOpacity onPress={fetchFiles}>
-            <Icon name="upload-cloud" size={28} color="#7AABCF" />
-          </TouchableOpacity>
-        </View>
+        <Header
+          title="ALBUM"
+          leftIcon="user"
+          onLeftPress={() => navigation.navigate('profileScreen')}
+          rightComponent={
+            <TouchableOpacity
+              onPress={handleUpload}
+              disabled={isUploading}
+              style={{
+                padding: 8,
+                backgroundColor: '#EDF6FA',
+                borderRadius: 8,
+              }}
+            >
+              {isUploading ? (
+                <ActivityIndicator size="small" color="#7AABCF" />
+              ) : (
+                <Icon name="upload-cloud" size={24} color="#7AABCF" />
+              )}
+            </TouchableOpacity>
+          }
+        />
 
-        {loading ? (
+        {isLoading || isTokenChecking ? (
           <View style={styles.centerState}>
             <ActivityIndicator size="large" color="#7AABCF" />
           </View>
-        ) : error ? (
+        ) : isError ? (
           <View style={styles.centerState}>
-            <Text style={styles.stateText}>{error}</Text>
-            <TouchableOpacity onPress={fetchFiles} style={styles.retryBtn}>
+            <Text style={styles.stateText}>{errorMessage}</Text>
+            <TouchableOpacity onPress={refetch} style={styles.retryBtn}>
               <Text style={styles.retryText}>Retry</Text>
             </TouchableOpacity>
           </View>
@@ -155,7 +143,7 @@ const HomeScreen = () => {
           files.length === 0 ? (
             <View style={styles.centerState}>
               <Text style={styles.stateText}>No images found.</Text>
-              <TouchableOpacity onPress={fetchFiles} style={styles.retryBtn}>
+              <TouchableOpacity onPress={refetch} style={styles.retryBtn}>
                 <Text style={styles.retryText}>Refresh</Text>
               </TouchableOpacity>
             </View>
@@ -165,28 +153,51 @@ const HomeScreen = () => {
               numColumns={3}
               keyExtractor={(item) => item.id}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 10, paddingTop: 50 }}
-              renderItem={({ item, i }) => (
-                <Image
-                  source={{
-                    uri: item.uri,
-                    headers: { Authorization: `Bearer ${token}` },
-                  }}
-                  onError={(e) => {
-                    console.log('IMAGE LOAD ERROR:', item.uri, e?.nativeEvent);
-                  }}
-                  style={{
-                    width: width / 3 - 12,
-                    height: heights[i] || 200,
-                    borderRadius: 14,
-                    marginBottom: 10,
-                  }}
-                />
-              )}
+              contentContainerStyle={{ paddingHorizontal: 10, paddingTop: 10 }}
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              renderItem={({ item, i }) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate('imageViewScreen', {
+                        uri: item.uri,
+                        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                        images: files,
+                        initialIndex: i,
+                      });
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={{
+                        uri: item.uri,
+                        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                      }}
+                      onError={(e) => {
+
+                      }}
+                      style={{
+                        width: width / 3 - 12,
+                        height: heights[i] || 200,
+                        borderRadius: 14,
+                        marginBottom: 10,
+                        backgroundColor: '#e1e4e8',
+                      }}
+                    />
+                  </TouchableOpacity>
+                );
+              }}
             />
           )
         )}
       </SafeAreaView>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={hideAlert}
+      />
     </LinearGradient>
   );
 };
@@ -230,7 +241,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 20,
-    fontWeight:"500",
+    fontWeight: "500",
     marginLeft: 16,
     marginVertical: 10,
     color: '#616161',
