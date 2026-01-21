@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
@@ -12,6 +12,27 @@ const loginScreen = () => {
   const navigation = useNavigation();
   const [phone, setphone] = useState("");
   const [sendOtp, { isLoading, error, data }] = useSendOtpMutation();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
 
   const handlelogin = async () => {
@@ -37,13 +58,15 @@ const loginScreen = () => {
       end={{ x: 0.5, y: 1 }}
       style={styles.container}
     >
-      <View style={styles.footerImageContainer}>
-        <Image
-          source={require('../../assets/images/Optimizex.webp')}
-          style={styles.footerImage}
-          resizeMode="cover"
-        />
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.footerImageContainer}>
+          <Image
+            source={require('../../assets/images/Optimizex.webp')}
+            style={styles.footerImage}
+            resizeMode="cover"
+          />
+        </View>
+      )}
 
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView

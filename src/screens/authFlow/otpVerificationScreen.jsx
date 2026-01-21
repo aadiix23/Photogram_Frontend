@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Dimensions, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image, Dimensions, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -22,6 +22,27 @@ const OtpVerificationScreen = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
@@ -87,13 +108,15 @@ const OtpVerificationScreen = () => {
       end={{ x: 0.5, y: 1 }}
       style={styles.container}
     >
-      <View style={styles.footerImageContainer}>
-        <Image
-          source={require('../../assets/images/Optimizex.webp')}
-          style={styles.footerImage}
-          resizeMode="cover"
-        />
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.footerImageContainer}>
+          <Image
+            source={require('../../assets/images/Optimizex.webp')}
+            style={styles.footerImage}
+            resizeMode="cover"
+          />
+        </View>
+      )}
 
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
