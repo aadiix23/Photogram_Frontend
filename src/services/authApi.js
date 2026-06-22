@@ -1,13 +1,18 @@
 
+import { Platform } from 'react-native';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const API_BASE_URL = Platform.OS === 'android'
+    ? 'http://10.0.2.2:6001'
+    : 'http://localhost:6001';
 
 export const authApi = createApi({
     reducerPath: 'authApi',
 
     baseQuery: fetchBaseQuery({
-        baseUrl: 'https://photogram-backend-xp7b.onrender.com',
+        baseUrl: API_BASE_URL,
         prepareHeaders: async (headers) => {
             const token = await AsyncStorage.getItem('token');
             if (token) {
@@ -37,7 +42,7 @@ export const authApi = createApi({
         getFiles: builder.query({
             query: () => '/files',
             transformResponse: (response) => {
-                const baseUrl = 'https://photogram-backend-xp7b.onrender.com';
+                const baseUrl = API_BASE_URL;
 
                 const extractFilesArray = (data, depth = 0) => {
                     if (depth > 5 || data == null) return [];
